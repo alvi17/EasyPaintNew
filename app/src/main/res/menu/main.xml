@@ -48,7 +48,6 @@
         android:orderInCategory="4"
         android:icon="@drawable/ic_action_social_share"
         android:visible="false"
-        app:showAsAction="always"
 
         />
         <item android:id="@+id/color"
@@ -71,7 +70,7 @@
         android:title="Save"
         android:orderInCategory="2"
         android:icon="@drawable/ic_action_content_save"
-        app:showAsAction="ifRoom"
+
         android:visible="false"
 
         />

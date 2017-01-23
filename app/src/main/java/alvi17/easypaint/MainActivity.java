@@ -1,11 +1,13 @@
 package alvi17.easypaint;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -17,14 +19,18 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -63,7 +69,7 @@ import adapters.DrawerItem;
 import views.DrawingView;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
     private String selectedImagePath;
     private DrawingView paintView;
     private AtomicBoolean dialogIsDisplayed=new AtomicBoolean();
@@ -93,6 +99,24 @@ public class MainActivity extends AppCompatActivity{
     FrameLayout fm;
     private InterstitialAd interstitial;
     boolean isadLoaded=false;
+
+    private static final String[] PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+
+    };
+
+    private static final int REQUEST_APP_PERMISSIONS = 0;
+    private final RequestPermissionDialog.OnClickListenerHandlerPermission m_onClickListenerHandlerPerm = new RequestPermissionDialog.OnClickListenerHandlerPermission() {
+        @Override
+        public void onClickListenerOk() {
+            ActivityCompat
+                    .requestPermissions(MainActivity.this, PERMISSIONS,
+                            REQUEST_APP_PERMISSIONS);
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -119,6 +143,7 @@ public class MainActivity extends AppCompatActivity{
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle(null);
 
 
 //        //facebook
@@ -167,6 +192,8 @@ public class MainActivity extends AppCompatActivity{
         dataList.add(new DrawerItem(" Screen LandScape", R.drawable.ic_hardware_tablet));
         dataList.add(new DrawerItem(" Set BackGround", R.drawable.android_back));
         dataList.add(new DrawerItem(" Load Prev Image", R.drawable.gallery));
+        dataList.add(new DrawerItem(" Share on Facebook", R.drawable.ic_facebook_1_1));
+        dataList.add(new DrawerItem(" Save Image", R.drawable.ic_action_content_save));
         dataList.add(new DrawerItem(" Clear",R.drawable.clear));
 
 
@@ -188,14 +215,14 @@ public class MainActivity extends AppCompatActivity{
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                getSupportActionBar().setTitle("Options");
+                getSupportActionBar().setTitle("");
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(mActivityTitle);
+                getSupportActionBar().setTitle(null);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
@@ -251,27 +278,110 @@ public class MainActivity extends AppCompatActivity{
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 break;
             case 3:
-
                 showBackgroundColor();
                 break;
 
             case 4:
+                if(checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        || checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent,"Select Picture"),SELECT_PICTURE);
+                    fm.removeView(edit);
+                    fm.removeView(edit1);
+                    toptextAdded=false;
+                    downtextAdded=false;
+                    x=0;
+                    y=0;
 
-                Intent intent = new Intent();
+                }
+                else
+                {
+                    requestlocationPermissions();
+                }
 
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent,"Select Picture"),SELECT_PICTURE);
-                fm.removeView(edit);
-                fm.removeView(edit1);
-                toptextAdded=false;
-                downtextAdded=false;
-                x=0;
-                y=0;
 
                 break;
 
             case 5:
+                DrawingView view=(DrawingView)findViewById(R.id.paintView);
+                final Bitmap bitmap = view.getBitmap();
+
+                if(AccessToken.getCurrentAccessToken()==null)
+                {
+                    currentDialog=new Dialog(this);
+                    currentDialog.setContentView(R.layout.fb_login);
+                    currentDialog.setTitle("Share with Facebook");
+                    currentDialog.setCancelable(true);
+//                    Button cancel=(Button)currentDialog.findViewById(R.id.cancel_button);
+//                    cancel.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        dialogIsDisplayed.set(false);
+//                        currentDialog.dismiss();
+//
+//                    }
+//                });
+                    LoginButton loginButton = (LoginButton) currentDialog.findViewById(R.id.login_button);
+
+                    loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+
+                        @Override
+                        public void onSuccess(LoginResult loginResult) {
+                            Toast.makeText(getApplicationContext(),"Login SuccessFul",Toast.LENGTH_LONG).show();
+
+                            dialogIsDisplayed.set(false);
+                            currentDialog.dismiss();
+                            SharePhoto photo = new SharePhoto.Builder()
+                                    .setBitmap(bitmap)
+                                    .build();
+                            SharePhotoContent content = new SharePhotoContent.Builder()
+                                    .addPhoto(photo)
+                                    .build();
+                            ShareDialog.show(MainActivity.this, content);
+
+                        }
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+
+                        @Override
+                        public void onError(FacebookException e) {
+                            Toast.makeText(getApplicationContext(),"Error Connecting to Facebook",Toast.LENGTH_LONG).show();
+
+                        }
+                    });
+                    dialogIsDisplayed.set(true);
+                    currentDialog.show();
+
+                }
+                else
+                {
+
+                    SharePhoto photo = new SharePhoto.Builder()
+                            .setBitmap(bitmap)
+                            .build();
+                    SharePhotoContent content = new SharePhotoContent.Builder()
+                            .addPhoto(photo)
+                            .build();
+                    ShareDialog.show(MainActivity.this, content);
+
+                }
+                break;
+            case 6:
+                if(checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        || checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    saveImage();
+                }
+                else
+                {
+                    requestlocationPermissions();
+                }
+                break;
+            case 7:
 
                 AlertDialog.Builder builder=new AlertDialog.Builder(this);
                 builder.setCancelable(true);
@@ -295,12 +405,12 @@ public class MainActivity extends AppCompatActivity{
                 builder.setNegativeButton("Cancel", null);
                 builder.show();
                 break;
-            case 7:
+            case 9:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=alvi17.easypaint"));
                 startActivity(browserIntent);
                 break;
 
-            case 8:
+            case 10:
                 final Dialog dialog=new Dialog(this);
                 dialog.setContentView(R.layout.help_view);
                 Button ok=(Button)dialog.findViewById(R.id.helpok);
@@ -317,7 +427,7 @@ public class MainActivity extends AppCompatActivity{
                 dialog.show();
 
                 break;
-            case 9:
+            case 11:
 
                 AlertDialog.Builder builder3=new AlertDialog.Builder(this);
                 builder3.setCancelable(true);
@@ -771,6 +881,15 @@ public class MainActivity extends AppCompatActivity{
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if(!checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                || !checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            requestlocationPermissions();
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         paintView=(DrawingView)findViewById(R.id.paintView);
         switch(item.getItemId())
@@ -997,9 +1116,64 @@ public class MainActivity extends AppCompatActivity{
             }
         }
 
-        //ca-app-pub-6508526601344465/4046023638
     }
 
+    private boolean checkPermission(String perm)
+    {
+        return(PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this, perm));
+    }
 
+    private void requestlocationPermissions() {
+
+        // BEGIN_INCLUDE(contacts_permission_request)
+        Log.e(this.getClass().getSimpleName(), "Requesting location permission");
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                || ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            Log.e(getClass().getSimpleName(),
+                    "Displaying contacts permission rationale to provide additional context.");
+            RequestPermissionDialog permissionDialog = new RequestPermissionDialog(
+                   MainActivity.this, m_onClickListenerHandlerPerm);
+
+            permissionDialog.setTitle("Kindly Grant Access");
+            permissionDialog.setMessage("Access to Storage is required for saving and loading drawn images.");
+
+            WindowManager.LayoutParams wmlp = permissionDialog.getWindow()
+                    .getAttributes();
+            wmlp.gravity = Gravity.CENTER;
+            permissionDialog.show();
+
+        } else {
+            // Contact permissions have not been granted yet. Request them directly.
+            ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_APP_PERMISSIONS);
+        }
+        // END_INCLUDE(contacts_permission_request)
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_APP_PERMISSIONS) {
+            boolean permissionGranted = true;
+            int index = 0;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    permissionGranted = false;
+                    Log.e(this.getClass().getSimpleName(), "Permission failed :" + permissions[index]);
+                    break;
+                }
+                index++;
+            }
+            if (!permissionGranted) {
+                // initialize the agent
+                //showToast("Permissions denied. Exiting.",Color.RED);
+                Toast.makeText(this,"Permission denied. App exiting",Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+        else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
 
 }
