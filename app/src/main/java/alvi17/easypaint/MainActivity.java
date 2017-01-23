@@ -188,19 +188,19 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     private void addDrawerItems() {
         dataList.add(new DrawerItem(" Main Options"));
         // adding a header to the list
-        dataList.add(new DrawerItem(" Screen Portrait", R.drawable.ic_hardware_smartphone));
-        dataList.add(new DrawerItem(" Screen LandScape", R.drawable.ic_hardware_tablet));
-        dataList.add(new DrawerItem(" Set BackGround", R.drawable.android_back));
-        dataList.add(new DrawerItem(" Load Prev Image", R.drawable.gallery));
+        dataList.add(new DrawerItem(" Screen Portrait", R.drawable.ic_smartphone_black_24dp));
+        dataList.add(new DrawerItem(" Screen LandScape", R.drawable.ic_tablet_black_24dp));
+        dataList.add(new DrawerItem(" Set BackGround", R.drawable.ic_gradient_black_24dp));
+        dataList.add(new DrawerItem(" Load Prev Image", R.drawable.ic_gallery_black_24dp));
         dataList.add(new DrawerItem(" Share on Facebook", R.drawable.ic_facebook_1_1));
-        dataList.add(new DrawerItem(" Save Image", R.drawable.ic_action_content_save));
-        dataList.add(new DrawerItem(" Clear",R.drawable.clear));
+        dataList.add(new DrawerItem(" Save Image", R.drawable.ic_save_black_24dp));
+        dataList.add(new DrawerItem(" Clear",R.drawable.ic_clear_black_24dp));
 
 
         dataList.add(new DrawerItem(" Other Options")); // adding a header to the list
-        dataList.add(new DrawerItem(" About", R.drawable.ic_action_about));
-        dataList.add(new DrawerItem(" Help", R.drawable.ic_action_help));
-        dataList.add(new DrawerItem(" Exit", R.drawable.clear));
+        dataList.add(new DrawerItem(" About", R.drawable.ic_info_outline_black_24dp));
+        dataList.add(new DrawerItem(" Help", R.drawable.ic_help_black_24dp));
+        dataList.add(new DrawerItem(" Exit", R.drawable.ic_clear_black_24dp));
         adapter = new Custom_Drawer_Adapter(this, R.layout.custom_drawer_item,
                 dataList);
 
@@ -431,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
                 AlertDialog.Builder builder3=new AlertDialog.Builder(this);
                 builder3.setCancelable(true);
-                builder3.setTitle("Conformation").setIcon(R.drawable.clear);
+                builder3.setTitle("Conformation").setIcon(R.drawable.ic_clear_black_24dp);
                 builder3.setMessage("Are you sure to Exit?");
                 builder3.setPositiveButton("Exit",new DialogInterface.OnClickListener() {
 
@@ -479,7 +479,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         // TODO Auto-generated method stub
 
         AlertDialog.Builder alert=new AlertDialog.Builder(this);
-        alert.setTitle("Exit").setIcon(R.drawable.clear);
+        alert.setTitle("Exit").setIcon(R.drawable.ic_clear_black_24dp);
         alert.setMessage("Do you want to Exit?");
         alert.setPositiveButton("Exit", new DialogInterface.OnClickListener()
         {
@@ -899,11 +899,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 showColorDialog();
                 return true;
             case R.id.line:
-                showLineWidthDialog();
+                paintView.setDrawingColor(paintView.getPrevColor());
+                Toast.makeText(getApplicationContext(),"Pencil loaded",Toast.LENGTH_LONG).show();
+                //showLineWidthDialog();
                 return true;
             case R.id.erase:
+                paintView.set_prevColor(paintView.getDrawingColor());
                 paintView.setDrawingColor(paintView.get_backgroundColor());
-                Toast.makeText(getApplicationContext(),"Eraser",Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),"Eraser loader",Toast.LENGTH_LONG).show();
                 return true;
             case R.id.clear:
                 edit.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -915,80 +918,79 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             case R.id.downtext:
                 showDownTextDialog();
                 return true;
-            case R.id.saveMenu:
-                saveImage();
-                return  true;
-
-
-            case R.id.fb:
-                DrawingView view=(DrawingView)findViewById(R.id.paintView);
-                final Bitmap bitmap = view.getBitmap();
-
-                if(AccessToken.getCurrentAccessToken()==null)
-                {
-                    currentDialog=new Dialog(this);
-                    currentDialog.setContentView(R.layout.fb_login);
-                    currentDialog.setTitle("Share with Facebook");
-                    currentDialog.setCancelable(true);
-//                    Button cancel=(Button)currentDialog.findViewById(R.id.cancel_button);
-//                    cancel.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        dialogIsDisplayed.set(false);
-//                        currentDialog.dismiss();
-//
-//                    }
-//                });
-                    LoginButton loginButton = (LoginButton) currentDialog.findViewById(R.id.login_button);
-
-                    loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-
-                        @Override
-                        public void onSuccess(LoginResult loginResult) {
-                            Toast.makeText(getApplicationContext(),"Login SuccessFul",Toast.LENGTH_LONG).show();
-
-                            dialogIsDisplayed.set(false);
-                            currentDialog.dismiss();
-                            SharePhoto photo = new SharePhoto.Builder()
-                                    .setBitmap(bitmap)
-                                    .build();
-                            SharePhotoContent content = new SharePhotoContent.Builder()
-                                    .addPhoto(photo)
-                                    .build();
-                            ShareDialog.show(MainActivity.this, content);
-
-                        }
-
-                        @Override
-                        public void onCancel() {
-
-                        }
-
-                        @Override
-                        public void onError(FacebookException e) {
-                            Toast.makeText(getApplicationContext(),"Error Connecting to Facebook",Toast.LENGTH_LONG).show();
-
-                        }
-                    });
-                    dialogIsDisplayed.set(true);
-                    currentDialog.show();
-
-                }
-                else
-                {
-
-                    SharePhoto photo = new SharePhoto.Builder()
-                            .setBitmap(bitmap)
-                            .build();
-                    SharePhotoContent content = new SharePhotoContent.Builder()
-                            .addPhoto(photo)
-                            .build();
-                    ShareDialog.show(MainActivity.this, content);
-
-                }
-
-
+            case R.id.thickness:
+                showLineWidthDialog();
                 return true;
+
+//            case R.id.fb:
+//                DrawingView view=(DrawingView)findViewById(R.id.paintView);
+//                final Bitmap bitmap = view.getBitmap();
+//
+//                if(AccessToken.getCurrentAccessToken()==null)
+//                {
+//                    currentDialog=new Dialog(this);
+//                    currentDialog.setContentView(R.layout.fb_login);
+//                    currentDialog.setTitle("Share with Facebook");
+//                    currentDialog.setCancelable(true);
+////                    Button cancel=(Button)currentDialog.findViewById(R.id.cancel_button);
+////                    cancel.setOnClickListener(new View.OnClickListener() {
+////                    @Override
+////                    public void onClick(View v) {
+////                        dialogIsDisplayed.set(false);
+////                        currentDialog.dismiss();
+////
+////                    }
+////                });
+//                    LoginButton loginButton = (LoginButton) currentDialog.findViewById(R.id.login_button);
+//
+//                    loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+//
+//                        @Override
+//                        public void onSuccess(LoginResult loginResult) {
+//                            Toast.makeText(getApplicationContext(),"Login SuccessFul",Toast.LENGTH_LONG).show();
+//
+//                            dialogIsDisplayed.set(false);
+//                            currentDialog.dismiss();
+//                            SharePhoto photo = new SharePhoto.Builder()
+//                                    .setBitmap(bitmap)
+//                                    .build();
+//                            SharePhotoContent content = new SharePhotoContent.Builder()
+//                                    .addPhoto(photo)
+//                                    .build();
+//                            ShareDialog.show(MainActivity.this, content);
+//
+//                        }
+//
+//                        @Override
+//                        public void onCancel() {
+//
+//                        }
+//
+//                        @Override
+//                        public void onError(FacebookException e) {
+//                            Toast.makeText(getApplicationContext(),"Error Connecting to Facebook",Toast.LENGTH_LONG).show();
+//
+//                        }
+//                    });
+//                    dialogIsDisplayed.set(true);
+//                    currentDialog.show();
+//
+//                }
+//                else
+//                {
+//
+//                    SharePhoto photo = new SharePhoto.Builder()
+//                            .setBitmap(bitmap)
+//                            .build();
+//                    SharePhotoContent content = new SharePhotoContent.Builder()
+//                            .addPhoto(photo)
+//                            .build();
+//                    ShareDialog.show(MainActivity.this, content);
+//
+//                }
+//
+//
+//                return true;
 
         }
 

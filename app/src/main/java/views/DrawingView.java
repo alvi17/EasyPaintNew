@@ -39,6 +39,7 @@ public class DrawingView extends View{
 	int i=0;
 	int j=0;
 	int color;
+	int prevColor;
 	public DrawingView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
@@ -52,6 +53,7 @@ public class DrawingView extends View{
 		paintLine.setStyle(Style.STROKE);
 		paintLine.setColor(Color.BLACK);
 		color=Color.WHITE;
+		prevColor=Color.BLACK;
 		paintLine.setStrokeWidth(2);
 		paintLine.setStrokeCap(Paint.Cap.ROUND);
 		pathMap=new HashMap<Integer,Path>();
@@ -239,6 +241,16 @@ public class DrawingView extends View{
 	{
 		return this.color;
 
+	}
+
+	public void set_prevColor(int color)
+	{
+		prevColor=color;
+	}
+
+	public int getPrevColor()
+	{
+		return this.prevColor;
 	}
 
 	public void saveImage(String name)

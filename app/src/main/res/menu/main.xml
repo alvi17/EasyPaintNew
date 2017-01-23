@@ -7,7 +7,7 @@
     <item android:id="@+id/erase"
         android:title="Eraser"
         android:orderInCategory="1"
-		android:icon="@drawable/ic_action_eraser_309104_640"
+		android:icon="@drawable/ic_content_cut_black_24dp"
         app:showAsAction="always"
 
         ></item>
@@ -16,7 +16,7 @@
         android:title="Text"
         android:orderInCategory="6"
 
-        android:icon="@drawable/ic_action_editor_format_color_text"
+        android:icon="@drawable/ic_spellcheck_black_24dp"
         app:showAsAction="always"
 
         >
@@ -24,7 +24,7 @@
            
         <item android:id="@+id/uptext"
         android:title="Top Text"
-            android:icon="@drawable/ic_action_editor_format_color_text"
+            android:icon="@drawable/ic_text_format_black_24dp"
         android:orderInCategory="6"
    
 
@@ -35,7 +35,7 @@
                 <item android:id="@+id/downtext"
         android:title="Bottom Text"
         android:orderInCategory="6"
-                    android:icon="@drawable/ic_action_editor_format_color_text"
+                    android:icon="@drawable/ic_text_format_black_24dp"
         app:showAsAction="ifRoom"
 
        />
@@ -46,22 +46,22 @@
     <item android:id="@+id/fb"
         android:title="Share\nFacebook"
         android:orderInCategory="4"
-        android:icon="@drawable/ic_action_social_share"
+        android:icon="@drawable/ic_facebook_1_1"
         android:visible="false"
 
         />
         <item android:id="@+id/color"
-        android:title="Line\nColor"
-        android:orderInCategory="3"
-            android:icon="@drawable/ic_action_image_palette"
+    android:title="Line\nColor"
+    android:orderInCategory="3"
+    android:icon="@drawable/ic_color_lens_black_24dp"
 
-        app:showAsAction="always"
+    app:showAsAction="always"
 
-        />
+    />
        <item android:id="@+id/line"
         android:title="Line\nWidth"
         android:orderInCategory="2"
-           android:icon="@drawable/ic_action_content_create"
+           android:icon="@drawable/ic_create_black_24dp"
 
            app:showAsAction="always"
 
@@ -69,12 +69,19 @@
     <item android:id="@+id/saveMenu"
         android:title="Save"
         android:orderInCategory="2"
-        android:icon="@drawable/ic_action_content_save"
+        android:icon="@drawable/ic_save_black_24dp"
 
         android:visible="false"
 
         />
 
-    
+    <item android:id="@+id/thickness"
+        android:title="Line\nWidth"
+        android:orderInCategory="3"
+        android:icon="@drawable/ic_view_day_black_24dp"
+
+        app:showAsAction="always"
+
+        />
 
 </menu>
